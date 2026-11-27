@@ -2,62 +2,366 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Tetris Cannon</title>
 <style>
-* {
-  box-sizing: border-box;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  touch-action: manipulation;
-}
 body {
-  background-color: #e0f2fe;
-  background-image: linear-gradient(180deg, #bae6fd 0%, #f1f5f9 100%);
+  margin: 0;
+  padding: 8px;
+  background-color: #bae6fd;
   color: #0f172a;
-  font-family: Arial, Helvetica, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 6px;
+  font-family: Arial, sans-serif;
+  text-align: center;
 }
-body.dark {
-  background-color: #090d16;
-  background-image: linear-gradient(180deg, #0f172a 0%, #090d16 100%);
-  color: #f8fafc;
-}
-.top-bar {
-  width: 100%;
-  max-width: 340px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  font-size: 12px;
+.bar {
+  max-width: 320px;
+  margin: 0 auto 8px auto;
   font-weight: bold;
+  font-size: 13px;
 }
-.badge {
+#wrap {
+  position: relative;
+  width: 240px;
+  height: 360px;
+  margin: 0 auto 10px auto;
   background-color: #ffffff;
-  color: #0369a1;
+  border: 3px solid #0284c7;
+  border-radius: 10px;
+}
+#cv {
+  display: block;
+  width: 240px;
+  height: 360px;
+}
+#panel {
+  position: absolute;
+  top: 60px;
+  left: 16px;
+  right: 16px;
+  background-color: #ffffff;
   border: 2px solid #0284c7;
-  border-radius: 16px;
-  padding: 4px 8px;
-  white-space: nowrap;
+  border-radius: 10px;
+  padding: 12px;
 }
-body.dark .badge {
-  background-color: #1e293b;
-  color: #38bdf8;
-  border-color: #38bdf8;
+#go {
+  background-color: #0284c7;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: bold;
+  margin-top: 8px;
 }
-.next-box {
-  display: flex;
-  align-items
+.keys {
+  max-width: 320px;
+  margin: 0 auto;
+}
+.keys button {
+  width: 72px;
+  padding: 12px 4px;
+  margin: 2px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 8px;
+  border: 2px solid #0284c7;
+  background-color: #ffffff;
+  color: #0f172a;
+}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <span id="pts">0 pts</span> | <span id="lvl">Nv 1</span> | <span id="info">Listo</span>
+  </div>
+
+  <div id="wrap">
+    <canvas id="cv" width="240" height="360"></canvas>
+    <div id="panel">
+      <div id="ptitle" style="font-size:18px;font-weight:bold;color:#0369a1;">TETRIS CANNON</div>
+      <div id="pdesc" style="font-size:12px;margin-top:4px;">Cada 400 pts disparas tocando el cuadro. Cuadro dorado limpia filas.</div>
+      <button type="button" id="go">JUGAR</button>
+    </div>
+  </div>
+
+  <div class="keys">
+    <button type="button" id="k-l">Izq</button>
+    <button type="button" id="k-r">Girar</button>
+    <button type="button" id="k-d">Bajar</button>
+    <button type="button" id="k-ri" style="background:#0284c7;color:#fff;">Der</button>
+  </div>
+
+  <script>
+  (function () {
+    var COLS = 10, ROWS = 15, S = 24;
+    var cv = document.getElementById("cv");
+    var ctx = cv.getContext("2d");
+    var panel = document.getElementById("panel");
+    var ptitle = document.getElementById("ptitle");
+    var pdesc = document.getElementById("pdesc");
+    var goBtn = document.getElementById("go");
+    var ptsEl = document.getElementById("pts");
+    var lvlEl = document.getElementById("lvl");
+    var infoEl = document.getElementById("info");
+
+    var PIECES = [
+      { m: [[1,1,1,1]], c: "#06b6d4" },
+      { m: [[1,1],[1,1]], c: "#eab308" },
+      { m: [[0,1,0],[1,1,1]], c: "#a855f7" },
+      { m: [[1,0,0],[1,1,1]], c: "#3b82f6" },
+      { m: [[0,0,1],[1,1,1]], c: "#f97316" },
+      { m: [[0,1,1],[1,1,0]], c: "#10b981" },
+      { m: [[1,1,0],[0,1,1]], c: "#ef4444" }
+    ];
+
+    var board = [];
+    var playing = false;
+    var score = 0, lvl = 1, nextCannon = 400;
+    var cannonMode = false, cannonLeft = 0, shots = 0;
+    var piece = null;
+    var dropCount = 0;
+
+    function newBoard() {
+      var b = [];
+      for (var r = 0; r < ROWS; r++) {
+        var row = [];
+        for (var c = 0; c < COLS; c++) row.push(0);
+        b.push(row);
+      }
+      return b;
+    }
+
+    function spawnPiece() {
+      var p = PIECES[Math.floor(Math.random() * PIECES.length)];
+      var m = [];
+      var ones = [];
+      for (var r = 0; r < p.m.length; r++) {
+        var row = [];
+        for (var c = 0; c < p.m[r].length; c++) {
+          row.push(p.m[r][c]);
+          if (p.m[r][c]) ones.push([r, c]);
+        }
+        m.push(row);
+      }
+      var gold = null;
+      if (ones.length && Math.random() < 0.3) {
+        gold = ones[Math.floor(Math.random() * ones.length)];
+      }
+      return { m: m, c: p.c, gold: gold, x: 3, y: 0 };
+    }
+
+    function fits(p, nx, ny, nm) {
+      var m = nm || p.m;
+      for (var r = 0; r < m.length; r++) {
+        for (var c = 0; c < m[r].length; c++) {
+          if (!m[r][c]) continue;
+          var bx = nx + c, by = ny + r;
+          if (bx < 0 || bx >= COLS || by >= ROWS) return false;
+          if (by >= 0 && board[by][bx]) return false;
+        }
+      }
+      return true;
+    }
+
+    function addPts(n) {
+      score += n;
+      lvl = 1 + Math.floor(score / 350);
+      ptsEl.textContent = score + " pts";
+      lvlEl.textContent = "Nv " + lvl;
+      if (score >= nextCannon && !cannonMode) {
+        nextCannon += 400;
+        cannonMode = true;
+        cannonLeft = 140;
+        shots = 6;
+        infoEl.textContent = "CANON (" + shots + ")";
+      }
+    }
+
+    function blastSpot(px, py) {
+      var cc = Math.floor(px / S), cr = Math.floor(py / S);
+      var hit = 0;
+      for (var r = cr - 1; r <= cr + 1; r++) {
+        for (var c = cc - 1; c <= cc + 1; c++) {
+          if (r >= 0 && r < ROWS && c >= 0 && c < COLS && board[r][c]) {
+            board[r][c] = 0;
+            hit++;
+          }
+        }
+      }
+      if (hit > 0) addPts(hit * 15);
+    }
+
+    function clearRows() {
+      var lines = 0;
+      for (var r = ROWS - 1; r >= 0; r--) {
+        var full = true;
+        for (var c = 0; c < COLS; c++) {
+          if (!board[r][c]) { full = false; break; }
+        }
+        if (full) {
+          board.splice(r, 1);
+          var empty = [];
+          for (var k = 0; k < COLS; k++) empty.push(0);
+          board.unshift(empty);
+          lines++;
+          r++;
+        }
+      }
+      if (lines > 0) addPts(lines * 120);
+    }
+
+    function lock() {
+      var goldRow = -1;
+      for (var r = 0; r < piece.m.length; r++) {
+        for (var c = 0; c < piece.m[r].length; c++) {
+          if (!piece.m[r][c]) continue;
+          var by = piece.y + r, bx = piece.x + c;
+          if (by < 0) {
+            playing = false;
+            ptitle.textContent = "FIN DEL JUEGO";
+            pdesc.textContent = "Puntos: " + score;
+            goBtn.textContent = "REINTENTAR";
+            panel.style.display = "block";
+            return;
+          }
+          var isG = piece.gold && piece.gold[0] === r && piece.gold[1] === c;
+          board[by][bx] = isG ? { c: "#fbbf24", g: 1 } : { c: piece.c, g: 0 };
+          if (isG) goldRow = by;
+        }
+      }
+      if (goldRow >= 0) {
+        var rowsToZap = [goldRow];
+        if (goldRow + 1 < ROWS) rowsToZap.push(goldRow + 1);
+        for (var i = 0; i < rowsToZap.length; i++) {
+          var rz = rowsToZap[i];
+          board.splice(rz, 1);
+          var eRow = [];
+          for (var z = 0; z < COLS; z++) eRow.push(0);
+          board.unshift(eRow);
+        }
+        addPts(150);
+      }
+      clearRows();
+      piece = spawnPiece();
+      if (!fits(piece, piece.x, piece.y, piece.m)) {
+        playing = false;
+        ptitle.textContent = "FIN DEL JUEGO";
+        pdesc.textContent = "Puntos: " + score;
+        goBtn.textContent = "REINTENTAR";
+        panel.style.display = "block";
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      ctx.strokeStyle = "#e2e8f0";
+      for (var c = 1; c < COLS; c++) {
+        ctx.beginPath(); ctx.moveTo(c * S, 0); ctx.lineTo(c * S, cv.height); ctx.stroke();
+      }
+      for (var r = 1; r < ROWS; r++) {
+        ctx.beginPath(); ctx.moveTo(0, r * S); ctx.lineTo(cv.width, r * S); ctx.stroke();
+      }
+      for (var br = 0; br < ROWS; br++) {
+        for (var bc = 0; bc < COLS; bc++) {
+          var cell = board[br][bc];
+          if (!cell) continue;
+          ctx.fillStyle = cell.c;
+          ctx.fillRect(bc * S + 1, br * S + 1, S - 2, S - 2);
+          if (cell.g) {
+            ctx.fillStyle = "#fef08a";
+            ctx.beginPath();
+            ctx.arc(bc * S + S / 2, br * S + S / 2, 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+      if (piece && playing && !cannonMode) {
+        for (var pr = 0; pr < piece.m.length; pr++) {
+          for (var pc = 0; pc < piece.m[pr].length; pc++) {
+            if (!piece.m[pr][pc]) continue;
+            var isG = piece.gold && piece.gold[0] === pr && piece.gold[1] === pc;
+            ctx.fillStyle = isG ? "#fbbf24" : piece.c;
+            ctx.fillRect((piece.x + pc) * S + 1, (piece.y + pr) * S + 1, S - 2, S - 2);
+          }
+        }
+      }
+      if (cannonMode) {
+        ctx.fillStyle = "#f59e0b";
+        ctx.fillRect(4, cv.height - 14, 16, 12);
+        ctx.fillRect(cv.width - 20, cv.height - 14, 16, 12);
+      }
+    }
+
+    goBtn.addEventListener("click", function () {
+      board = newBoard();
+      score = 0; lvl = 1; nextCannon = 400;
+      cannonMode = false; cannonLeft = 0; shots = 0;
+      ptsEl.textContent = "0 pts";
+      lvlEl.textContent = "Nv 1";
+      infoEl.textContent = "Jugando";
+      piece = spawnPiece();
+      panel.style.display = "none";
+      playing = true;
+      draw();
+    });
+
+    cv.addEventListener("click", function (e) {
+      if (!playing || !cannonMode || shots <= 0) return;
+      var rect = cv.getBoundingClientRect();
+      var x = ((e.clientX - rect.left) / rect.width) * cv.width;
+      var y = ((e.clientY - rect.top) / rect.height) * cv.height;
+      blastSpot(x, y);
+      shots--;
+      infoEl.textContent = shots > 0 ? "CANON (" + shots + ")" : "Jugando";
+      if (shots <= 0) { cannonMode = false; cannonLeft = 0; }
+      draw();
+    });
+
+    document.getElementById("k-l").addEventListener("click", function () {
+      if (playing && !cannonMode && fits(piece, piece.x - 1, piece.y, piece.m)) { piece.x--; draw(); }
+    });
+    document.getElementById("k-r").addEventListener("click", function () {
+      if (playing && !cannonMode && piece) {
+        var R = piece.m.length, C = piece.m[0].length, rot = [];
+        for (var c = 0; c < C; c++) {
+          var row = [];
+          for (var r = R - 1; r >= 0; r--) row.push(piece.m[r][c]);
+          rot.push(row);
+        }
+        if (fits(piece, piece.x, piece.y, rot)) { piece.m = rot; draw(); }
+      }
+    });
+    document.getElementById("k-d").addEventListener("click", function () {
+      if (playing && !cannonMode && fits(piece, piece.x, piece.y + 1, piece.m)) { piece.y++; addPts(2); draw(); }
+    });
+    document.getElementById("k-ri").addEventListener("click", function () {
+      if (playing && !cannonMode && fits(piece, piece.x + 1, piece.y, piece.m)) { piece.x++; draw(); }
+    });
+
+    board = newBoard();
+    draw();
+
+    setInterval(function () {
+      if (!playing) return;
+      if (cannonMode) {
+        cannonLeft--;
+        if (cannonLeft <= 0) {
+          cannonMode = false;
+          infoEl.textContent = "Jugando";
+        }
+        draw();
+        return;
+      }
+      dropCount++;
+      var lim = Math.max(4, 16 - lvl);
+      if (dropCount >= lim) {
+        dropCount = 0;
+        if (fits(piece, piece.x, piece.y + 1, piece.m)) piece.y++;
+        else lock();
+      }
+      draw();
+    }, 50);
+  })();
+  </script>
+</body>
+</html>

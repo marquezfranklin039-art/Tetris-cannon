@@ -15,132 +15,49 @@ html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100dvh;
+  height: 100%;
   overflow: hidden;
   touch-action: manipulation;
 }
 body {
-  padding: 6px;
-  background: linear-gradient(160deg, #dbeafe 0%, #f1f5f9 55%, #e2e8f0 100%);
+  background-color: #e0f2fe;
+  background-image: linear-gradient(180deg, #bae6fd 0%, #f1f5f9 100%);
   color: #0f172a;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  padding: 8px 6px;
 }
 body.dark {
-  background: linear-gradient(160deg, #090d16 0%, #111827 60%, #0b1120 100%);
+  background-color: #090d16;
+  background-image: linear-gradient(180deg, #0f172a 0%, #090d16 100%);
   color: #f8fafc;
 }
-.bar {
+.top-bar {
   width: 100%;
-  max-width: 360px;
+  max-width: 340px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 5px;
-  margin-bottom: 6px;
+  justify-content: space-between;
+  gap: 4px;
   font-size: 12px;
-  font-weight: 800;
-  flex: 0 0 auto;
+  font-weight: bold;
 }
-.pill {
-  background: #ffffff;
+.badge {
+  background-color: #ffffff;
   color: #0369a1;
   border: 2px solid #0284c7;
-  border-radius: 999px;
-  padding: 4px 9px;
+  border-radius: 16px;
+  padding: 4px 8px;
   white-space: nowrap;
 }
-body.dark .pill {
-  background: #172033;
+body.dark .badge {
+  background-color: #1e293b;
   color: #38bdf8;
   border-color: #38bdf8;
 }
-.next-wrap {
+.next-box {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  background: #ffffff;
-  border: 2px solid #0284c7;
-  border-radius: 999px;
-  padding: 2px 7px;
-  flex: 0 0 auto;
-}
-body.dark .next-wrap {
-  background: #172033;
-  border-color: #38bdf8;
-}
-#box {
-  position: relative;
-  width: min(260px, calc((100dvh - 138px) * 0.555));
-  aspect-ratio: 10 / 18;
-  flex: 0 1 auto;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 3px solid #0284c7;
-  background: #f0f9ff;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
-}
-body.dark #box {
-  background: #0b1120;
-  border-color: #38bdf8;
-}
-#box.cannon-active {
-  border-color: #f59e0b;
-  box-shadow: 0 0 18px rgba(245, 158, 11, 0.55);
-}
-canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-#banner {
-  display: none;
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  right: 8px;
-  padding: 6px 8px;
-  border-radius: 10px;
-  background: rgba(245, 158, 11, 0.95);
-  color: #0f172a;
-  font-size: 11.5px;
-  font-weight: 900;
-  text-align: center;
-  z-index: 4;
-  pointer-events: none;
-}
-#overlay {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  top: 28px;
-  padding: 14px 10px;
-  border-radius: 14px;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.94);
-  border: 2px solid #0284c7;
-  z-index: 8;
-  cursor: pointer;
-}
-body.dark #overlay {
-  background: rgba(15, 23, 42, 0.94);
-  border-color: #38bdf8;
-}
-#ov-title {
-  font-size: 18px;
-  font-weight: 900;
-  color: #0369a1;
-}
-body.dark #ov-title { color: #38bdf8; }
-#ov-sub {
-  margin-top: 4px;
-  font-size: 12px;
-  font-weight: 800;
-}
-#cfg-panel {
-  display: none;
-  width: 100%;
-  
+  align-items

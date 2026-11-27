@@ -11,9 +11,15 @@
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
-body {
+html, body {
   margin: 0;
-  height: 100vh;
+  padding: 0;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+body {
   padding: 6px;
   background: linear-gradient(160deg, #dbeafe 0%, #f1f5f9 55%, #e2e8f0 100%);
   color: #0f172a;
@@ -22,8 +28,6 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  touch-action: manipulation;
 }
 body.dark {
   background: linear-gradient(160deg, #090d16 0%, #111827 60%, #0b1120 100%);
@@ -31,22 +35,23 @@ body.dark {
 }
 .bar {
   width: 100%;
-  max-width: 440px;
+  max-width: 360px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 5px;
   margin-bottom: 6px;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 800;
+  flex: 0 0 auto;
 }
 .pill {
   background: #ffffff;
   color: #0369a1;
   border: 2px solid #0284c7;
   border-radius: 999px;
-  padding: 4px 10px;
-  box-shadow: 0 3px 0 rgba(2, 132, 199, 0.22);
+  padding: 4px 9px;
+  white-space: nowrap;
 }
 body.dark .pill {
   background: #172033;
@@ -60,7 +65,8 @@ body.dark .pill {
   background: #ffffff;
   border: 2px solid #0284c7;
   border-radius: 999px;
-  padding: 2px 8px;
+  padding: 2px 7px;
+  flex: 0 0 auto;
 }
 body.dark .next-wrap {
   background: #172033;
@@ -68,9 +74,9 @@ body.dark .next-wrap {
 }
 #box {
   position: relative;
-  width: 260px;
-  height: 468px;
-  max-height: calc(100vh - 122px);
+  width: min(260px, calc((100dvh - 138px) * 0.555));
+  aspect-ratio: 10 / 18;
+  flex: 0 1 auto;
   border-radius: 16px;
   overflow: hidden;
   border: 3px solid #0284c7;
@@ -94,13 +100,13 @@ canvas {
   display: none;
   position: absolute;
   top: 8px;
-  left: 10px;
-  right: 10px;
-  padding: 6px 10px;
+  left: 8px;
+  right: 8px;
+  padding: 6px 8px;
   border-radius: 10px;
-  background: rgba(245, 158, 11, 0.94);
+  background: rgba(245, 158, 11, 0.95);
   color: #0f172a;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 900;
   text-align: center;
   z-index: 4;
@@ -110,719 +116,31 @@ canvas {
   position: absolute;
   left: 12px;
   right: 12px;
-  top: 26px;
-  padding: 12px 10px;
+  top: 28px;
+  padding: 14px 10px;
   border-radius: 14px;
   text-align: center;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.94);
   border: 2px solid #0284c7;
-  z-index: 6;
+  z-index: 8;
   cursor: pointer;
 }
 body.dark #overlay {
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(15, 23, 42, 0.94);
   border-color: #38bdf8;
 }
 #ov-title {
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 900;
   color: #0369a1;
 }
 body.dark #ov-title { color: #38bdf8; }
 #ov-sub {
-  margin-top: 3px;
+  margin-top: 4px;
   font-size: 12px;
   font-weight: 800;
 }
 #cfg-panel {
   display: none;
   width: 100%;
-  max-width: 440px;
-  margin-top: 6px;
-  padding: 8px;
-  border-radius: 14px;
-  background: #ffffff;
-  border: 2px solid #cbd5e1;
-  gap: 6px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-body.dark #cfg-panel { background: #172033; border-color: #334155; }
-#cfg-panel.open { display: flex; }
-.rec-tag {
-  width: 100%;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 800;
-  color: #0369a1;
-}
-body.dark .rec-tag { color: #38bdf8; }
-.pads {
-  width: 100%;
-  max-width: 440px;
-  margin-top: 8px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-}
-button {
-  border: 2px solid #94a3b8;
-  background: #ffffff;
-  color: #0f172a;
-  border-radius: 12px;
-  padding: 10px 4px;
-  font-weight: 800;
-  font-size: 13px;
-  cursor: pointer;
-  touch-action: manipulation;
-  box-shadow: 0 3px 0 #cbd5e1;
-}
-button:active { transform: translateY(2px); }
-body.dark button {
-  background: #172033;
-  color: #f8fafc;
-  border-color: #334155;
-  box-shadow: 0 3px 0 #0f172a;
-}
-.main {
-  background: linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%);
-  color: #ffffff;
-  border-color: #0369a1;
-  box-shadow: 0 3px 0 #0369a1;
-}
-</style>
-</head>
-<body>
-  <div class="bar">
-    <span class="pill" id="t-lvl">Nv 1</span>
-    <span class="pill" id="t-pts">0 pts</span>
-    <div class="next-wrap">
-      <span>Sig</span>
-      <canvas id="next-cv" width="36" height="24"></canvas>
-    </div>
-    <button type="button" id="b-pause" style="padding:5px 8px;">Pausa</button>
-    <button type="button" id="b-cfg" style="padding:5px 8px;">Ajustes</button>
-  </div>
-
-  <div id="box">
-    <canvas id="cv" width="260" height="468"></canvas>
-    <div id="banner">MODO CANON: TOCA EL TABLERO PARA DISPARAR</div>
-    <div id="overlay">
-      <div id="ov-title">TETRIS CANNON</div>
-      <div id="ov-sub">Toca Jugar - Canones + Bloques Dorados</div>
-    </div>
-  </div>
-
-  <div id="cfg-panel">
-    <button type="button" id="o-theme" style="padding:8px 12px;">Pantalla: Clara</button>
-    <button type="button" id="o-snd" style="padding:8px 12px;">Sonido: Si</button>
-    <div class="rec-tag" id="o-rec">Record: 0 pts</div>
-  </div>
-
-  <div class="pads">
-    <button type="button" id="b-left">Izq</button>
-    <button type="button" id="b-rot">Girar</button>
-    <button type="button" id="b-down">Bajar</button>
-    <button type="button" class="main" id="b-right">Der</button>
-  </div>
-
-  <script>
-    (function () {
-      var COLS = 10, ROWS = 18;
-      var cv = document.getElementById("cv");
-      var ctx = cv.getContext("2d");
-      var ncv = document.getElementById("next-cv");
-      var nctx = ncv.getContext("2d");
-      var box = document.getElementById("box");
-      var banner = document.getElementById("banner");
-      var overlay = document.getElementById("overlay");
-      var ovTitle = document.getElementById("ov-title");
-      var ovSub = document.getElementById("ov-sub");
-      var tLvl = document.getElementById("t-lvl");
-      var tPts = document.getElementById("t-pts");
-      var bPause = document.getElementById("b-pause");
-      var cfgPanel = document.getElementById("cfg-panel");
-      var oRec = document.getElementById("o-rec");
-
-      var SHAPES = [
-        { m: [[1, 1, 1, 1]], c: "#06b6d4" },
-        { m: [[1, 1], [1, 1]], c: "#eab308" },
-        { m: [[0, 1, 0], [1, 1, 1]], c: "#a855f7" },
-        { m: [[1, 0, 0], [1, 1, 1]], c: "#3b82f6" },
-        { m: [[0, 0, 1], [1, 1, 1]], c: "#f97316" },
-        { m: [[0, 1, 1], [1, 1, 0]], c: "#10b981" },
-        { m: [[1, 1, 0], [0, 1, 1]], c: "#ef4444" }
-      ];
-
-      var board = [];
-      var mode = "start";
-      var pts = 0, lvl = 1, best = 0;
-      var nextCannonPts = 400;
-      var cannonTimer = 0, cannonShots = 0;
-      var sideLaser = null;
-      var shells = [], sparks = [], texts = [];
-      var cur = null, nxt = null;
-      var dropAcc = 0, lastTs = 0;
-      var snd = true, audio = null;
-
-      try { best = Number(localStorage.getItem("tc_rec")) || 0; } catch (e) {}
-      oRec.textContent = "Record: " + best + " pts";
-
-      function ensureAudio() {
-        if (!snd) return null;
-        try {
-          var A = window.AudioContext || window.webkitAudioContext;
-          if (!A) return null;
-          if (!audio) audio = new A();
-          if (audio.state === "suspended") audio.resume();
-          return audio;
-        } catch (e) { return null; }
-      }
-
-      function tone(f, d, w, v, f2) {
-        var a = ensureAudio();
-        if (!a) return;
-        try {
-          var t = a.currentTime;
-          var o = a.createOscillator(), g = a.createGain();
-          o.type = w || "triangle";
-          o.frequency.setValueAtTime(f, t);
-          if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
-          g.gain.setValueAtTime(0.001, t);
-          g.gain.linearRampToValueAtTime(v || 0.13, t + 0.01);
-          g.gain.exponentialRampToValueAtTime(0.001, t + d);
-          o.connect(g);
-          g.connect(a.destination);
-          o.start(t);
-          o.stop(t + d + 0.02);
-        } catch (e) {}
-      }
-
-      function saveBest() {
-        if (pts > best) best = pts;
-        oRec.textContent = "Record: " + best + " pts";
-        try { localStorage.setItem("tc_rec", String(best)); } catch (e) {}
-      }
-
-      function addFloatText(x, y, txt, col) {
-        texts.push({ x: x, y: y, txt: txt, col: col, life: 0.85 });
-      }
-
-      function spawnBoom(x, y, col, count) {
-        for (var i = 0; i < (count || 12); i++) {
-          var a = Math.random() * Math.PI * 2;
-          var sp = 40 + Math.random() * 110;
-          sparks.push({ x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, col: col, life: 0.45 });
-        }
-      }
-
-      function emptyBoard() {
-        var b = [];
-        for (var r = 0; r < ROWS; r++) {
-          var row = [];
-          for (var c = 0; c < COLS; c++) row.push(null);
-          b.push(row);
-        }
-        return b;
-      }
-
-      function makePiece() {
-        var base = SHAPES[Math.floor(Math.random() * SHAPES.length)];
-        var m = [];
-        var ones = [];
-        for (var r = 0; r < base.m.length; r++) {
-          var row = [];
-          for (var c = 0; c < base.m[r].length; c++) {
-            row.push(base.m[r][c]);
-            if (base.m[r][c]) ones.push({ r: r, c: c });
-          }
-          m.push(row);
-        }
-        var gold = null;
-        if (Math.random() < 0.28 && ones.length) {
-          gold = ones[Math.floor(Math.random() * ones.length)];
-        }
-        return {
-          m: m,
-          c: base.c,
-          gold: gold,
-          x: Math.floor((COLS - m[0].length) / 2),
-          y: 0
-        };
-      }
-
-      function drawNext() {
-        nctx.clearRect(0, 0, ncv.width, ncv.height);
-        if (!nxt) return;
-        var sz = 7;
-        var ox = Math.floor((ncv.width - nxt.m[0].length * sz) / 2);
-        var oy = Math.floor((ncv.height - nxt.m.length * sz) / 2);
-        for (var r = 0; r < nxt.m.length; r++) {
-          for (var c = 0; c < nxt.m[r].length; c++) {
-            if (!nxt.m[r][c]) continue;
-            var isG = nxt.gold && nxt.gold.r === r && nxt.gold.c === c;
-            nctx.fillStyle = isG ? "#fbbf24" : nxt.c;
-            nctx.fillRect(ox + c * sz, oy + r * sz, sz - 1, sz - 1);
-          }
-        }
-      }
-
-      function valid(p, nx, ny, nm) {
-        var m = nm || p.m;
-        for (var r = 0; r < m.length; r++) {
-          for (var c = 0; c < m[r].length; c++) {
-            if (!m[r][c]) continue;
-            var bx = nx + c, by = ny + r;
-            if (bx < 0 || bx >= COLS || by >= ROWS) return false;
-            if (by >= 0 && board[by][bx]) return false;
-          }
-        }
-        return true;
-      }
-
-      function rotatePiece() {
-        if (!cur || mode !== "play" || cannonTimer > 0) return;
-        var R = cur.m.length, C = cur.m[0].length;
-        var rot = [];
-        for (var c = 0; c < C; c++) {
-          var row = [];
-          for (var r = R - 1; r >= 0; r--) row.push(cur.m[r][c]);
-          rot.push(row);
-        }
-        var newGold = cur.gold ? { r: cur.gold.c, c: R - 1 - cur.gold.r } : null;
-        var kicks = [0, -1, 1, -2, 2];
-        for (var i = 0; i < kicks.length; i++) {
-          if (valid(cur, cur.x + kicks[i], cur.y, rot)) {
-            cur.m = rot;
-            cur.gold = newGold;
-            cur.x += kicks[i];
-            tone(520, 0.05, "sine", 0.09, 680);
-            return;
-          }
-        }
-      }
-
-      function addScore(val) {
-        pts += val;
-        lvl = 1 + Math.floor(pts / 350);
-        tPts.textContent = pts + " pts";
-        tLvl.textContent = "Nv " + lvl;
-        saveBest();
-        if (pts >= nextCannonPts && cannonTimer <= 0) {
-          nextCannonPts += 400;
-          activateCornerCannons();
-        }
-      }
-
-      function activateCornerCannons() {
-        cannonTimer = 6.5;
-        cannonShots = 7;
-        box.classList.add("cannon-active");
-        banner.style.display = "block";
-        banner.textContent = "CANONES ACTIVOS (" + cannonShots + " TIROS) - TOCA EL CUADRO";
-        tone(320, 0.14, "sawtooth", 0.14, 780);
-      }
-
-      function fireCornerCannons(tx, ty) {
-        if (cannonTimer <= 0 || cannonShots <= 0) return;
-        cannonShots--;
-        banner.textContent = "CANONES ACTIVOS (" + cannonShots + " TIROS) - TOCA EL CUADRO";
-        var origins = [
-          { x: 18, y: cv.height - 16 },
-          { x: cv.width - 18, y: cv.height - 16 }
-        ];
-        for (var i = 0; i < origins.length; i++) {
-          var ox = origins[i].x, oy = origins[i].y;
-          var ang = Math.atan2(ty - oy, tx - ox);
-          shells.push({
-            x: ox, y: oy,
-            tx: tx, ty: ty,
-            vx: Math.cos(ang) * 520,
-            vy: Math.sin(ang) * 520
-          });
-        }
-        tone(220, 0.1, "sawtooth", 0.15, 90);
-        if (cannonShots <= 0) {
-          cannonTimer = 0.6;
-        }
-      }
-
-      function blastAt(px, py) {
-        var cw = cv.width / COLS, ch = cv.height / ROWS;
-        var cc = Math.floor(px / cw), cr = Math.floor(py / ch);
-        var destroyed = 0;
-        for (var r = cr - 1; r <= cr + 1; r++) {
-          for (var c = cc - 1; c <= cc + 1; c++) {
-            if (r >= 0 && r < ROWS && c >= 0 && c < COLS && board[r][c]) {
-              board[r][c] = null;
-              destroyed++;
-            }
-          }
-        }
-        spawnBoom(px, py, "#f59e0b", 18);
-        tone(140, 0.16, "sawtooth", 0.16, 55);
-        if (destroyed > 0) {
-          var bonus = destroyed * 15;
-          addScore(bonus);
-          addFloatText(px, py - 8, "+" + bonus, "#d97706");
-        }
-      }
-
-      function triggerGoldSideCannons(goldRows) {
-        var uniqueRows = [];
-        for (var i = 0; i < goldRows.length; i++) {
-          if (uniqueRows.indexOf(goldRows[i]) === -1) uniqueRows.push(goldRows[i]);
-        }
-        uniqueRows.sort(function (a, b) { return a - b; });
-        var targetRows = uniqueRows.slice(0, 2);
-        if (targetRows.length === 1 && targetRows[0] + 1 < ROWS) {
-          targetRows.push(targetRows[0] + 1);
-        }
-        var clearedBlocks = 0;
-        for (var ti = 0; ti < targetRows.length; ti++) {
-          var rr = targetRows[ti];
-          for (var c = 0; c < COLS; c++) {
-            if (board[rr][c]) clearedBlocks++;
-          }
-          board.splice(rr, 1);
-          var empty = [];
-          for (var ec = 0; ec < COLS; ec++) empty.push(null);
-          board.unshift(empty);
-        }
-        sideLaser = { rows: targetRows, life: 0.55 };
-        var ch = cv.height / ROWS;
-        spawnBoom(cv.width * 0.5, targetRows[0] * ch + ch * 0.5, "#fbbf24", 24);
-        tone(440, 0.18, "triangle", 0.16, 1040);
-        var gain = 120 + clearedBlocks * 10;
-        addScore(gain);
-        addFloatText(cv.width * 0.5, targetRows[0] * ch + 10, "CANON DORADO +" + gain, "#eab308");
-      }
-
-      function clearLines() {
-        var lines = 0;
-        for (var r = ROWS - 1; r >= 0; r--) {
-          var full = true;
-          for (var c = 0; c < COLS; c++) {
-            if (!board[r][c]) { full = false; break; }
-          }
-          if (full) {
-            board.splice(r, 1);
-            var row = [];
-            for (var ec = 0; ec < COLS; ec++) row.push(null);
-            board.unshift(row);
-            lines++;
-            r++;
-          }
-        }
-        if (lines > 0) {
-          var gain = [0, 100, 250, 450, 700][lines] || lines * 200;
-          addScore(gain);
-          addFloatText(cv.width * 0.5, cv.height * 0.45, "+" + gain, "#10b981");
-          tone(580, 0.14, "triangle", 0.15, 920);
-        }
-      }
-
-      function lockPiece() {
-        var goldRows = [];
-        for (var r = 0; r < cur.m.length; r++) {
-          for (var c = 0; c < cur.m[r].length; c++) {
-            if (!cur.m[r][c]) continue;
-            var by = cur.y + r, bx = cur.x + c;
-            if (by < 0) {
-              mode = "over";
-              syncOverlay();
-              tone(160, 0.25, "sawtooth", 0.16, 65);
-              return;
-            }
-            var isG = cur.gold && cur.gold.r === r && cur.gold.c === c;
-            board[by][bx] = { c: isG ? "#fbbf24" : cur.c, gold: isG };
-            if (isG) goldRows.push(by);
-          }
-        }
-        tone(260, 0.05, "sine", 0.08, 190);
-        if (goldRows.length > 0) {
-          triggerGoldSideCannons(goldRows);
-        }
-        clearLines();
-        cur = nxt || makePiece();
-        nxt = makePiece();
-        drawNext();
-        if (!valid(cur, cur.x, cur.y, cur.m)) {
-          mode = "over";
-          syncOverlay();
-          tone(160, 0.25, "sawtooth", 0.16, 65);
-        }
-      }
-
-      function syncOverlay() {
-        if (mode === "play") {
-          overlay.style.display = "none";
-        } else {
-          overlay.style.display = "block";
-          if (mode === "start") {
-            ovTitle.textContent = "TETRIS CANNON";
-            ovSub.textContent = "Toca aqui para jugar";
-          } else if (mode === "pause") {
-            ovTitle.textContent = "EN PAUSA";
-            ovSub.textContent = "Toca para continuar";
-          } else {
-            ovTitle.textContent = "TORRE LLENA";
-            ovSub.textContent = "Puntos: " + pts + " - Toca para reiniciar";
-          }
-        }
-      }
-
-      function startGame() {
-        ensureAudio();
-        cfgPanel.classList.remove("open");
-        board = emptyBoard();
-        pts = 0;
-        lvl = 1;
-        nextCannonPts = 400;
-        cannonTimer = 0;
-        cannonShots = 0;
-        sideLaser = null;
-        shells = [];
-        sparks = [];
-        texts = [];
-        box.classList.remove("cannon-active");
-        banner.style.display = "none";
-        cur = makePiece();
-        nxt = makePiece();
-        drawNext();
-        tPts.textContent = "0 pts";
-        tLvl.textContent = "Nv 1";
-        bPause.textContent = "Pausa";
-        mode = "play";
-        syncOverlay();
-        tone(440, 0.12, "triangle", 0.14, 660);
-      }
-
-      function step(dt) {
-        if (sideLaser) {
-          sideLaser.life -= dt;
-          if (sideLaser.life <= 0) sideLaser = null;
-        }
-        var nextShells = [];
-        for (var si = 0; si < shells.length; si++) {
-          var s = shells[si];
-          s.x += s.vx * dt;
-          s.y += s.vy * dt;
-          var dx = s.tx - s.x, dy = s.ty - s.y;
-          if (dx * dx + dy * dy < 190 || s.y <= s.ty) {
-            blastAt(s.tx, s.ty);
-          } else {
-            nextShells.push(s);
-          }
-        }
-        shells = nextShells;
-
-        var nextSparks = [];
-        for (var ki = 0; ki < sparks.length; ki++) {
-          var sp = sparks[ki];
-          sp.x += sp.vx * dt;
-          sp.y += sp.vy * dt;
-          sp.life -= dt;
-          if (sp.life > 0) nextSparks.push(sp);
-        }
-        sparks = nextSparks;
-
-        var nextTexts = [];
-        for (var ti = 0; ti < texts.length; ti++) {
-          var tx = texts[ti];
-          tx.y -= 26 * dt;
-          tx.life -= dt;
-          if (tx.life > 0) nextTexts.push(tx);
-        }
-        texts = nextTexts;
-
-        if (mode !== "play") return;
-
-        if (cannonTimer > 0) {
-          cannonTimer -= dt;
-          if (cannonTimer <= 0) {
-            cannonTimer = 0;
-            box.classList.remove("cannon-active");
-            banner.style.display = "none";
-          }
-          return;
-        }
-
-        var interval = Math.max(0.14, 0.68 - (lvl - 1) * 0.045);
-        dropAcc += dt;
-        if (dropAcc >= interval) {
-          dropAcc = 0;
-          if (valid(cur, cur.x, cur.y + 1, cur.m)) {
-            cur.y++;
-          } else {
-            lockPiece();
-          }
-        }
-      }
-
-      function drawBlock(c, r, col, gold) {
-        var cw = cv.width / COLS, ch = cv.height / ROWS;
-        var x = c * cw, y = r * ch;
-        ctx.fillStyle = col;
-        ctx.fillRect(x + 1, y + 1, cw - 2, ch - 2);
-        ctx.strokeStyle = gold ? "#ffffff" : "rgba(15, 23, 42, 0.45)";
-        ctx.lineWidth = gold ? 2 : 1.2;
-        ctx.strokeRect(x + 1.5, y + 1.5, cw - 3, ch - 3);
-        if (gold) {
-          ctx.fillStyle = "#fef08a";
-          ctx.beginPath();
-          ctx.arc(x + cw * 0.5, y + ch * 0.5, 4, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-
-      function render() {
-        var dark = document.body.classList.contains("dark");
-        ctx.clearRect(0, 0, cv.width, cv.height);
-        var cw = cv.width / COLS, ch = cv.height / ROWS;
-
-        ctx.strokeStyle = dark ? "rgba(56, 189, 248, 0.1)" : "rgba(2, 132, 199, 0.12)";
-        ctx.lineWidth = 1;
-        for (var c = 1; c < COLS; c++) {
-          ctx.beginPath();
-          ctx.moveTo(c * cw, 0);
-          ctx.lineTo(c * cw, cv.height);
-          ctx.stroke();
-        }
-        for (var r = 1; r < ROWS; r++) {
-          ctx.beginPath();
-          ctx.moveTo(0, r * ch);
-          ctx.lineTo(cv.width, r * ch);
-          ctx.stroke();
-        }
-
-        for (var br = 0; br < ROWS; br++) {
-          for (var bc = 0; bc < COLS; bc++) {
-            var cell = board[br] && board[br][bc];
-            if (cell) drawBlock(bc, br, cell.c, cell.gold);
-          }
-        }
-
-        if (cur && mode === "play" && cannonTimer <= 0) {
-          for (var pr = 0; pr < cur.m.length; pr++) {
-            for (var pc = 0; pc < cur.m[pr].length; pc++) {
-              if (!cur.m[pr][pc]) continue;
-              var isG = cur.gold && cur.gold.r === pr && cur.gold.c === pc;
-              drawBlock(cur.x + pc, cur.y + pr, isG ? "#fbbf24" : cur.c, isG);
-            }
-          }
-        }
-
-        if (sideLaser) {
-          for (var li = 0; li < sideLaser.rows.length; li++) {
-            var ly = sideLaser.rows[li] * ch + ch * 0.5;
-            ctx.fillStyle = "rgba(251, 191, 36, 0.45)";
-            ctx.fillRect(0, ly - ch * 0.45, cv.width, ch * 0.9);
-            ctx.fillStyle = "#f59e0b";
-            ctx.fillRect(0, ly - 8, 16, 16);
-            ctx.fillRect(cv.width - 16, ly - 8, 16, 16);
-          }
-        }
-
-        if (cannonTimer > 0) {
-          var corners = [18, cv.width - 18];
-          for (var ci = 0; ci < corners.length; ci++) {
-            var cx = corners[ci], cy = cv.height - 14;
-            ctx.fillStyle = "#f59e0b";
-            ctx.beginPath();
-            ctx.arc(cx, cy, 13, Math.PI, 0);
-            ctx.fill();
-            ctx.fillStyle = "#0f172a";
-            ctx.fillRect(cx - 4, cy - 18, 8, 12);
-          }
-        }
-
-        for (var si = 0; si < shells.length; si++) {
-          var s = shells[si];
-          ctx.fillStyle = "#ef4444";
-          ctx.beginPath();
-          ctx.arc(s.x, s.y, 5, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        for (var ki = 0; ki < sparks.length; ki++) {
-          var sp = sparks[ki];
-          ctx.fillStyle = sp.col;
-          ctx.fillRect(sp.x - 2, sp.y - 2, 4, 4);
-        }
-
-        ctx.font = "900 13px system-ui, sans-serif";
-        ctx.textAlign = "center";
-        for (var ti = 0; ti < texts.length; ti++) {
-          var tx = texts[ti];
-          ctx.fillStyle = tx.col;
-          ctx.fillText(tx.txt, tx.x, tx.y);
-        }
-      }
-
-      function handleBoardTap(clientX, clientY) {
-        if (mode !== "play") return;
-        if (cannonTimer > 0) {
-          var rect = cv.getBoundingClientRect();
-          var x = (clientX - rect.left) * (cv.width / rect.width);
-          var y = (clientY - rect.top) * (cv.height / rect.height);
-          fireCornerCannons(x, y);
-        }
-      }
-
-      cv.addEventListener("touchstart", function (e) {
-        if (e.touches && e.touches[0]) {
-          handleBoardTap(e.touches[0].clientX, e.touches[0].clientY);
-        }
-      }, { passive: true });
-      cv.addEventListener("mousedown", function (e) {
-        handleBoardTap(e.clientX, e.clientY);
-      });
-
-      function onTap(el, fn) {
-        var lock = 0;
-        var fire = function () {
-          var now = Date.now();
-          if (now - lock < 160) return;
-          lock = now;
-          fn();
-        };
-        el.addEventListener("touchstart", fire, { passive: true });
-        el.addEventListener("click", fire);
-      }
-
-      onTap(overlay, function () {
-        if (mode === "pause") {
-          mode = "play";
-          bPause.textContent = "Pausa";
-          syncOverlay();
-        } else {
-          startGame();
-        }
-      });
-
-      onTap(bPause, function () {
-        if (mode === "play") {
-          mode = "pause";
-          bPause.textContent = "Seguir";
-          syncOverlay();
-        } else if (mode === "pause") {
-          mode = "play";
-          bPause.textContent = "Pausa";
-          syncOverlay();
-        }
-      });
-
-      onTap(document.getElementById("b-cfg"), function () {
-        cfgPanel.classList.toggle("open");
-      });
-      onTap(document.getElementById("o-theme"), function () {
-        var d = document.body.classList.toggle("dark");
-        document.getElementById("o-theme").textContent = "Pantalla: " + (d ? "Oscura" : "Clara");
-      });
-      onTap(document.getElementById("o-snd"), function () {
-        snd = !snd;
-        document.getElementById("o-snd").textContent = "Sonido: " + (snd ? "Si" : "No");
-      });
-
-      onTap(document.getElementById("b-left"), function () {
+  
